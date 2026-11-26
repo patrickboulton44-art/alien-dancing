@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Good Morning Teng</title>
+<meta name="description" content="An alien watches the sunrise, says good morning to Teng, and the whole planet dances.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👽</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="-1400" x2="0" y2="660" gradientUnits="userSpaceOnUse">
+      <stop id="sk0" offset="0" stop-color="#070b24"/>
+      <stop id="sk1" offset="0.6" stop-color="#1a1744"/>
+      <stop id="sk2" offset="1" stop-color="#3b2559"/>
+    </linearGradient>
+    <radialGradient id="sunGlow">
+      <stop offset="0" stop-color="#fff6c8" stop-opacity=".95"/>
+      <stop offset=".3" stop-color="#ffd35c" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunCore" cx=".42" cy=".38">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset=".55" stop-color="#ffd84a"/>
+      <stop offset="1" stop-color="#ffa62b"/>
+    </radialGradient>
+  </defs>
+  <g id="world">
+    <rect x="-5000" y="-4000" width="12000" height="5000" fill="url(#sky)"/>
+    <g id="stars"></g>
+    <g id="moon">
+      <circle cx="330" cy="190" r="46" fill="#f4f1ff"/>
+      <circle cx="312" cy="176" r="9" fill="#d9d4f0"/>
+      <circle cx="348" cy="206" r="6" fill="#d9d4f0"/>
+      <circle cx="340" cy="168" r="4" fill="#d9d4f0"/>
+    </g>
+    <g id="sun" transform="translate(1180,860)">
+      <circle r="460" fill="url(#sunGlow)"/>
+      <g id="rays"></g>
+      <circle r="105" fill="url(#sunCore)"/>
+      <g id="sunFace" opacity="0">
+        <path d="M-42 -10 Q-30 -26 -18 -10" stroke="#b25a00" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M18 -10 Q30 -26 42 -10" stroke="#b25a00" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M-30 18 Q0 48 30 18" stroke="#b25a00" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <ellipse cx="-54" cy="14" rx="12" ry="7" fill="#ff7a59" opacity=".6"/>
+        <ellipse cx="54" cy="14" rx="12" ry="7" fill="#ff7a59" opacity=".6"/>
+      </g>
+    </g>
+    <path id="hillsFar"/>
+    <path id="hillsNear"/>
+    <rect id="ground" x="-5000" y="640" width="12000" height="5000"/>
+    <g id="rocks"></g>
+    <g id="actors"></g>
+    <g id="fx"></g>
+    <rect id="tint" x="-5000" y="-4000" width="12000" height="10000" fill="#0a0f30" pointer-events="none"/>
+  </g>
+</svg>
+
+<h1 id="title" aria-live="polite"></h1>
+
+<div id="intro">
+  <div class="card">
+    <div class="emoji">👽</div>
+    <p>It's still dark on planet Zorp…</p>
+    <button id="start" type="button">☀️ Wake up</button>
+    <small>Sound on 🔊</small>
+  </div>
+</div>
+
+<div id="controls" hidden>
+  <button id="replay" type="button" aria-label="Replay">↻ Replay</button>
+  <button id="mute" type="button" aria-label="Mute">🔊</button>
+</div>
+
+<script src="music.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

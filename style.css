@@ -1,0 +1,84 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: #070b24;
+  font-family: 'Luckiest Guy', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  -webkit-user-select: none; user-select: none;
+}
+#stage { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; }
+
+/* ---------- title ---------- */
+#title {
+  position: fixed; left: 0; right: 0; top: max(5vh, env(safe-area-inset-top));
+  margin: 0; text-align: center; pointer-events: none;
+  font-weight: normal; line-height: .92; letter-spacing: .03em;
+  font-size: clamp(40px, 10vw, 140px);
+  color: #fff;
+  text-shadow: 0 .06em 0 #ff6b35, 0 .12em .25em rgba(40, 10, 60, .45);
+}
+#title .line { display: block; white-space: nowrap; }
+#title .line2 {
+  font-size: 1.45em; color: #ffe66d;
+  text-shadow: 0 .06em 0 #e83f6f, 0 .12em .25em rgba(40, 10, 60, .45);
+}
+#title .l { display: inline-block; opacity: 0; transform: scale(0) rotate(-25deg); }
+#title .sp { display: inline-block; width: .35em; }
+#title.show .l { animation: pop .55s cubic-bezier(.2, 1.7, .4, 1) forwards; animation-delay: calc(var(--i) * 60ms); }
+#title.dance .l {
+  opacity: 1; transform: none;
+  animation: bob var(--beat, .469s) ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -70ms);
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0) rotate(-25deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes bob {
+  from { transform: translateY(0) rotate(-4deg); }
+  to { transform: translateY(-.14em) rotate(4deg); }
+}
+
+/* ---------- intro card ---------- */
+#intro {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  background: radial-gradient(ellipse at 50% 60%, rgba(10, 15, 48, .2), rgba(5, 7, 25, .75));
+  transition: opacity .6s ease;
+}
+#intro.gone { opacity: 0; pointer-events: none; }
+.card { text-align: center; color: #e9e6ff; padding: 24px; }
+.card .emoji { font-size: 84px; animation: float 2.4s ease-in-out infinite; }
+.card p { font-size: clamp(20px, 4vw, 30px); margin: 10px 0 26px; letter-spacing: .03em; }
+.card small { display: block; margin-top: 18px; opacity: .6; font-size: 15px; letter-spacing: .05em; }
+@keyframes float { 50% { transform: translateY(-12px) rotate(6deg); } }
+
+button {
+  font: inherit; cursor: pointer; border: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+#start {
+  font-size: clamp(26px, 5vw, 38px); letter-spacing: .04em;
+  padding: 18px 42px 14px; border-radius: 999px;
+  color: #3a1600; background: linear-gradient(#ffe680, #ffb02e);
+  box-shadow: 0 6px 0 #c4660f, 0 12px 30px rgba(255, 170, 40, .45);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+#start:hover { transform: translateY(-2px) scale(1.03); }
+#start:active { transform: translateY(4px); box-shadow: 0 2px 0 #c4660f, 0 6px 16px rgba(255, 170, 40, .4); }
+
+/* ---------- controls ---------- */
+#controls {
+  position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex; gap: 10px;
+}
+#controls[hidden] { display: none; }
+#controls button {
+  font-size: 18px; letter-spacing: .04em; padding: 10px 16px 7px; border-radius: 999px;
+  color: #fff; background: rgba(20, 20, 60, .45);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .35);
+}
+#controls button:hover { background: rgba(20, 20, 60, .65); }
+
+@media (prefers-reduced-motion: reduce) {
+  .card .emoji { animation: none; }
+}
