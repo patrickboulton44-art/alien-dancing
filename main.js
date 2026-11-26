@@ -67,135 +67,123 @@ const R = rng(7);
   }
 })();
 
-// ---------- alien rig ----------
+// ---------- alien rig: armless, legless plush gumdrop ----------
+const BLOB = 'M-82 -6 C-94 -86 -80 -164 -36 -192 C-14 -205 14 -205 36 -192 C80 -164 94 -86 82 -6 C66 7 -66 7 -82 -6 Z';
+let gradN = 0;
 function makeAlien(color, seed = 0) {
-  const OUT = mix(color, '#0a0a1a', .62), belly = mix(color, '#ffffff', .4);
-  const root = el('g'), body = el('g', null, root);
-  const tube = (p, len, w) => {
-    el('line', { x1: 0, y1: 0, x2: 0, y2: len, stroke: OUT, 'stroke-width': w + 7, 'stroke-linecap': 'round' }, p);
-    el('line', { x1: 0, y1: 0, x2: 0, y2: len, stroke: color, 'stroke-width': w, 'stroke-linecap': 'round' }, p);
-  };
-  const joint = (p, x, y) => el('g', null, el('g', { transform: `translate(${x},${y})` }, p));
-  const legs = {}, arms = {}, ants = {};
-  for (const s of [-1, 1]) {
-    const th = joint(body, s * 17, -74); tube(th, 36, 15);
-    const sh = joint(th, 0, 36); tube(sh, 34, 15);
-    el('ellipse', { cx: s * 7, cy: 37, rx: 15, ry: 8, fill: color, stroke: OUT, 'stroke-width': 3.5 }, sh);
-    legs[s] = { th, sh };
-  }
-  el('ellipse', { cx: 0, cy: -104, rx: 36, ry: 44, fill: color, stroke: OUT, 'stroke-width': 4 }, body);
-  el('ellipse', { cx: 0, cy: -96, rx: 21, ry: 27, fill: belly, opacity: .75 }, body);
-  for (const s of [-1, 1]) {
-    const ua = joint(body, s * 30, -128); tube(ua, 30, 12);
-    const fa = joint(ua, 0, 30); tube(fa, 28, 12);
-    el('circle', { cx: 0, cy: 32, r: 10, fill: color, stroke: OUT, 'stroke-width': 3.5 }, fa);
-    arms[s] = { ua, fa };
-  }
-  const head = joint(body, 0, -140);
-  for (const s of [-1, 1]) {
-    const a = joint(head, s * 20, -98), d = `M0 0 Q ${s * 6} -24 ${s * 16} -44`;
-    el('path', { d, stroke: OUT, 'stroke-width': 10, fill: 'none', 'stroke-linecap': 'round' }, a);
-    el('path', { d, stroke: color, 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' }, a);
-    el('circle', { cx: s * 16, cy: -49, r: 9, fill: '#ffe066', stroke: OUT, 'stroke-width': 3 }, a);
+  const OUT = mix(color, '#0a1a05', .55), HI = mix(color, '#ffffff', .45), LO = mix(color, '#203a00', .25);
+  const gid = 'bg' + (gradN++);
+  const defs = document.querySelector('#stage defs');
+  const grad = el('radialGradient', { id: gid, cx: '.38', cy: '.3', r: '.85' }, defs);
+  el('stop', { offset: '0', 'stop-color': HI }, grad);
+  el('stop', { offset: '.45', 'stop-color': color }, grad);
+  el('stop', { offset: '1', 'stop-color': LO }, grad);
+
+  const root = el('g');
+  const shadow = el('ellipse', { cx: 0, cy: 2, rx: 70, ry: 12, fill: '#000', opacity: .18 }, root);
+  const mover = el('g', null, root);
+  const body = el('g', null, mover);                       // pivots at the blob's base
+  const ants = {};
+  // antennae: short yellow stalks with flat felt discs (behind the body)
+  [[-1, -30, -184, 18, -14], [1, 32, -182, 14, 22]].forEach(([s, x, y, r, tilt]) => {
+    const a = el('g', null, el('g', { transform: `translate(${x},${y})` }, body));
+    el('path', { d: `M0 6 Q ${s * 2} -6 ${s * 6} -16`, stroke: '#c79a00', 'stroke-width': 13, fill: 'none', 'stroke-linecap': 'round' }, a);
+    el('path', { d: `M0 6 Q ${s * 2} -6 ${s * 6} -16`, stroke: '#ffd31a', 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' }, a);
+    el('ellipse', { cx: s * 8, cy: -22 - r * .5, rx: r, ry: r * (s < 0 ? 1 : .62), fill: '#ffde2e', stroke: '#c79a00', 'stroke-width': 3, transform: `rotate(${tilt} ${s * 8} ${-22 - r * .5})` }, a);
     ants[s] = a;
-  }
-  el('ellipse', { cx: 0, cy: -54, rx: 64, ry: 54, fill: color, stroke: OUT, 'stroke-width': 4 }, head);
-  el('ellipse', { cx: -22, cy: -88, rx: 18, ry: 9, fill: '#fff', opacity: .25, transform: 'rotate(-18 -22 -88)' }, head);
-  const blush = el('g', { opacity: 0 }, head);
-  for (const s of [-1, 1]) el('ellipse', { cx: s * 44, cy: -34, rx: 12, ry: 7, fill: '#ff5f9e', opacity: .8 }, blush);
-  const eyesN = el('g', null, head), look = el('g', null, eyesN);
+  });
+  el('path', { d: BLOB, fill: `url(#${gid})`, stroke: OUT, 'stroke-width': 4, 'stroke-linejoin': 'round' }, body);
+  // soft plush sheen
+  el('ellipse', { cx: -30, cy: -150, rx: 20, ry: 11, fill: '#fff', opacity: .22, transform: 'rotate(-30 -30 -150)' }, body);
+
+  const face = el('g', null, body);
+  const blush = el('g', { opacity: 0 }, face);
+  for (const s of [-1, 1]) el('ellipse', { cx: s * 50, cy: -62, rx: 13, ry: 7, fill: '#ff6f9e', opacity: .75 }, blush);
+  const eyesN = el('g', null, face), look = el('g', null, eyesN);
+  const sparkle = [];
   for (const s of [-1, 1]) {
-    el('ellipse', { cx: s * 24, cy: -60, rx: 16, ry: 21, fill: '#111' }, look);
-    el('circle', { cx: s * 24 - 5, cy: -68, r: 6, fill: '#fff' }, look);
-    el('circle', { cx: s * 24 + 5, cy: -53, r: 2.5, fill: '#fff' }, look);
+    const e = el('g', { transform: `translate(${s * 33},-92) rotate(${s * 28})` }, look);
+    el('ellipse', { cx: 0, cy: 0, rx: 21, ry: 29, fill: '#141414', stroke: '#3a3a3a', 'stroke-width': 3 }, e);
+    el('ellipse', { cx: 2 * -s, cy: -12, rx: 5, ry: 4, fill: '#fff', transform: `rotate(${-s * 28} ${2 * -s} -12)` }, e);
+    sparkle.push(el('circle', { cx: 7 * s, cy: 10, r: 3.5, fill: '#fff', opacity: 0 }, e));
   }
-  const eyesH = el('g', { opacity: 0 }, head);
-  for (const s of [-1, 1]) el('path', { d: `M${s * 24 - 15} -55 Q${s * 24} -82 ${s * 24 + 15} -55`, stroke: '#111', 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' }, eyesH);
-  const mouthN = el('path', { d: 'M-10 -26 Q0 -21 10 -26', stroke: '#111', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' }, head);
-  const mouthH = el('g', { opacity: 0 }, head);
-  el('path', { d: 'M-24 -34 Q0 6 24 -34 Z', fill: '#5a1030', stroke: '#111', 'stroke-width': 4, 'stroke-linejoin': 'round' }, mouthH);
-  el('path', { d: 'M-11 -18 Q0 -28 11 -18 Q0 -10 -11 -18 Z', fill: '#ff6f91' }, mouthH);
-  return { root, body, head, legs, arms, ants, eyesN, look, eyesH, mouthN, mouthH, blush, face: -1, vis: true, seed };
+  const mouthN = el('path', { d: 'M-13 -52 Q0 -40 13 -52', stroke: '#1a1a1a', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, face);
+  const mouthH = el('g', { opacity: 0 }, face);
+  el('path', { d: 'M-20 -56 Q0 -22 20 -56 Z', fill: '#5a1030', stroke: '#1a1a1a', 'stroke-width': 3.5, 'stroke-linejoin': 'round' }, mouthH);
+  el('path', { d: 'M-9 -40 Q0 -48 9 -40 Q0 -33 -9 -40 Z', fill: '#ff6f91' }, mouthH);
+  return { root, shadow, mover, body, face, ants, eyesN, look, mouthN, mouthH, blush, sparkle, face_: -1, vis: true, seed };
 }
 
 function setFace(A, h) {
-  if (A.face === h) return;
-  A.face = h;
-  A.eyesN.setAttribute('opacity', 1 - h); A.mouthN.setAttribute('opacity', 1 - h);
-  A.eyesH.setAttribute('opacity', h); A.mouthH.setAttribute('opacity', h); A.blush.setAttribute('opacity', h);
+  if (A.face_ === h) return;
+  A.face_ = h;
+  A.mouthN.setAttribute('opacity', 1 - h); A.mouthH.setAttribute('opacity', h);
+  A.blush.setAttribute('opacity', h); A.sparkle.forEach(s => s.setAttribute('opacity', h));
 }
 function setVis(A, v) { if (A.vis !== v) { A.vis = v; A.root.style.display = v ? '' : 'none'; } }
 
-const N = { dx: 0, dy: 0, rot: 0, head: 0, look: 0, ant: 0, sx: 1, sy: 1, blink: 1,
-  lUA: 14, lFA: -8, rUA: -14, rFA: 8, lTh: 5, lSh: -2, rTh: -5, rSh: 2 };
+// dx/dy: position offset · rot: lean · sk: jelly skew · st: vertical stretch (<1 squash)
+// head: face slides sideways (fake 3D turn) · look: pupils · ant: antenna wobble
+const N = { dx: 0, dy: 0, rot: 0, sk: 0, st: 1, head: 0, look: 0, ant: 0, blink: 1 };
 const KEYS = Object.keys(N);
 const P = o => Object.assign({}, N, o);
 function blend(a, b, w) { const o = {}; for (const k of KEYS) o[k] = lerp(a[k], b[k], w); return o; }
 
-const rot = (g, a) => g.setAttribute('transform', `rotate(${a.toFixed(1)})`);
 function applyPose(A, p, x, y, s) {
-  A.root.setAttribute('transform', `translate(${(x + p.dx * s).toFixed(1)},${(y + p.dy * s).toFixed(1)}) scale(${(s * p.sx).toFixed(3)},${(s * p.sy).toFixed(3)})`);
-  A.body.setAttribute('transform', `rotate(${p.rot.toFixed(1)} 0 -74)`);
-  rot(A.head, p.head);
-  rot(A.arms[-1].ua, p.lUA); rot(A.arms[-1].fa, p.lFA);
-  rot(A.arms[1].ua, p.rUA); rot(A.arms[1].fa, p.rFA);
-  rot(A.legs[-1].th, p.lTh); rot(A.legs[-1].sh, p.lSh);
-  rot(A.legs[1].th, p.rTh); rot(A.legs[1].sh, p.rSh);
-  rot(A.ants[-1], p.ant); rot(A.ants[1], -p.ant * .8);
-  A.look.setAttribute('transform', `translate(${p.look.toFixed(1)},${(-60 * (1 - p.blink)).toFixed(1)}) scale(1,${p.blink.toFixed(2)})`);
+  const sx = 1 + (1 - p.st) * .9;
+  A.root.setAttribute('transform', `translate(${(x + p.dx * s).toFixed(1)},${y.toFixed(1)}) scale(${s.toFixed(3)})`);
+  const air = clamp(-p.dy / 120);
+  A.shadow.setAttribute('transform', `scale(${(1 - .45 * air).toFixed(3)})`);
+  A.shadow.setAttribute('opacity', (.18 * (1 - .6 * air)).toFixed(3));
+  A.mover.setAttribute('transform', `translate(0,${p.dy.toFixed(1)})`);
+  A.body.setAttribute('transform', `rotate(${p.rot.toFixed(1)}) skewX(${p.sk.toFixed(1)}) scale(${sx.toFixed(3)},${p.st.toFixed(3)})`);
+  A.face.setAttribute('transform', `translate(${p.head.toFixed(1)},0)`);
+  A.ants[-1].setAttribute('transform', `rotate(${p.ant.toFixed(1)})`);
+  A.ants[1].setAttribute('transform', `rotate(${(-p.ant * .8).toFixed(1)})`);
+  A.look.setAttribute('transform', `translate(${p.look.toFixed(1)},${(-92 * (1 - p.blink)).toFixed(1)}) scale(1,${p.blink.toFixed(2)})`);
 }
 
 // ---------- poses ----------
-function walk(t) {
-  const ph = t * Math.PI * 3.2, s = Math.sin(ph), b = Math.abs(Math.sin(ph));
-  return P({ dy: -9 * b, rot: 4 * s, head: -3 * s, sy: 1 - .03 * (1 - b), ant: 14 * Math.sin(ph + 1),
-    lUA: 16 + 22 * s, rUA: -16 + 22 * s, lFA: -14, rFA: 14,
-    lTh: 4 + 16 * s, rTh: -4 + 16 * s, lSh: -8 * pos(s), rSh: 8 * pos(-s), look: 3 });
+function walk(t) {                 // hop-hop-hop along
+  const ph = t * Math.PI * 2.4, hop = Math.abs(Math.sin(ph));
+  const land = Math.pow(1 - hop, 6);
+  return P({ dy: -26 * hop, st: 1 + .08 * hop - .14 * land, rot: 6 + 3 * Math.cos(ph * 2), sk: -6 * Math.cos(ph),
+    head: 8, look: 4, ant: 18 * Math.sin(ph * 2 + 1) });
 }
 function lookUp(t) {
-  return P({ head: 9, look: 7, rot: 2, ant: 4 * Math.sin(t * 3), lUA: 10, rUA: -10 });
+  return P({ rot: 4, head: 10, look: 6, st: 1.03, ant: 5 * Math.sin(t * 3) });
 }
 function cheer(th, ph = 0, amt = 1) {
   const hop = th < .7 ? Math.sin(Math.PI * th / .7) : 0;
-  const w = Math.sin(th * 11 + ph), bb = Math.abs(Math.sin(th * Math.PI / BEAT / 2 + ph));
-  const land = th > .7 && th < .95 ? Math.sin(Math.PI * (th - .7) / .25) : 0;
-  return P({ dy: (-75 * hop - 8 * bb) * amt, sy: 1 - .1 * land, sx: 1 + .08 * land,
-    lUA: 150 + 12 * w, lFA: -18 + 16 * w, rUA: -150 + 12 * w, rFA: 18 + 16 * w,
-    head: 6 * Math.sin(th * 5 + ph), ant: 26 * Math.sin(th * 14 + ph) * Math.exp(-th * .8) + 8 * Math.sin(th * 6 + ph),
-    lTh: 8 + 6 * hop, rTh: -8 - 6 * hop });
+  const land = th > .62 && th < .95 ? Math.sin(Math.PI * (th - .62) / .33) : 0;
+  const bb = Math.abs(Math.sin(th * Math.PI / BEAT / 2 + ph));
+  return P({ dy: (-95 * hop - 14 * bb) * amt, st: 1 + .16 * hop - .2 * land - .05 * (1 - bb) * amt,
+    sk: 9 * Math.sin(th * 9 + ph) * amt, rot: 5 * Math.sin(th * 4.5 + ph),
+    head: 6 * Math.sin(th * 5 + ph), ant: 30 * Math.sin(th * 14 + ph) * Math.exp(-th * .8) + 10 * Math.sin(th * 6 + ph) });
 }
 
-// Subject 3 (科目三) inspired moves. b = beat (float).
-function legTwist(c) {
-  return { lTh: 6 - 18 * pos(c) + 6 * pos(-c), lSh: 26 * pos(c),
-           rTh: -6 + 18 * pos(-c) - 6 * pos(c), rSh: -26 * pos(-c) };
-}
-function moveSwing(b) {          // arms swing across chest, hips go the other way, knees twist
+// Subject 3 (科目三) inspired moves, reworked for a blob with no arms. b = beat (float).
+function moveSwing(b) {          // hips one way, top jiggles the other, dip on every beat
   const c = snap(Math.cos(Math.PI * b)), d = Math.abs(Math.cos(Math.PI * b));
-  return P(Object.assign({ dx: 14 * c, dy: 10 * d - 5, rot: -6 * c, head: 8 * c, look: 5 * c, ant: 14 * c,
-    lUA: 28 - 30 * c, lFA: -112, rUA: -28 - 30 * c, rFA: 112 }, legTwist(c)));
+  return P({ dx: 16 * c, dy: -6 * (1 - d), rot: -7 * c, sk: 14 * c, st: 1 - .08 * d + .04,
+    head: 12 * c, look: 5 * c, ant: 18 * c });
 }
-function moveWings(b) {          // arms out wide, wrists flap, alternating kick-twist
-  const c = snap(Math.cos(Math.PI * b)), f = Math.sin(2 * Math.PI * b), d = Math.abs(Math.cos(Math.PI * b));
-  return P({ dy: 11 * d - 6, rot: 5 * c, head: -6 * c, look: -4 * c, ant: 16 * f,
-    lUA: 94 + 6 * f, lFA: 28 * f, rUA: -94 - 6 * f, rFA: -28 * f,
-    lTh: 6 + 26 * pos(c), lSh: -30 * pos(c), rTh: -6 - 26 * pos(-c), rSh: 30 * pos(-c) });
+function moveBounce(b) {         // hop every beat, tilting alternately, squash on landing
+  const c = snap(Math.cos(Math.PI * b)), hop = Math.abs(Math.sin(Math.PI * b)), land = Math.pow(1 - hop, 5);
+  return P({ dy: -48 * hop, st: 1 + .12 * hop - .18 * land, rot: 9 * c, sk: -6 * c,
+    head: -8 * c, look: -4 * c, ant: 24 * Math.sin(2 * Math.PI * b) });
 }
-function movePaws(b) {           // paws at the chin, head tilts, double-time knee wobble
+function moveWobble(b) {         // double-time jelly wobble, head bobbing side to side
   const c = snap(Math.cos(Math.PI * b)), k = snap(Math.cos(2 * Math.PI * b));
-  return P({ dx: 7 * c, dy: 6 * Math.abs(k) - 3, rot: 7 * c, head: 13 * c, look: 5 * c, ant: 18 * k,
-    lUA: 30, lFA: -150 + 10 * k, rUA: -30, rFA: 150 + 10 * k,
-    lTh: 8 - 15 * k, lSh: 18 * k, rTh: -8 + 15 * k, rSh: -18 * k });
+  return P({ dx: 6 * c, sk: 16 * k, rot: 5 * c, st: 1 + .05 * k, dy: -5 * Math.abs(k),
+    head: 13 * c, look: 5 * c, ant: 22 * k });
 }
-function moveWave(b) {           // shuffle sideways, one hand on hip, other waving overhead
-  const c = snap(Math.cos(Math.PI * b)), f = Math.sin(2 * Math.PI * b), d = Math.abs(Math.cos(Math.PI * b));
-  const left = Math.floor(b / 4) % 2 === 0;
-  const arms = left
-    ? { lUA: 102, lFA: 72 + 28 * f, rUA: -42, rFA: 98 }
-    : { rUA: -102, rFA: -72 + 28 * f, lUA: 42, lFA: -98 };
-  return P(Object.assign({ dx: 50 * Math.sin(Math.PI * b / 4), dy: 9 * d - 4, rot: -4 * c, head: (left ? -8 : 8), ant: 15 * f }, arms, legTwist(c)));
+function moveShuffle(b) {        // slide sideways while "turning" (face slides round the blob)
+  const c = snap(Math.cos(Math.PI * b)), d = Math.abs(Math.cos(Math.PI * b)), turn = Math.sin(Math.PI * b / 2);
+  return P({ dx: 55 * Math.sin(Math.PI * b / 4), dy: -8 * (1 - d), rot: -8 * c, sk: 8 * c, st: 1 - .07 * d + .03,
+    head: 26 * turn, look: 8 * turn, ant: 16 * Math.sin(2 * Math.PI * b) });
 }
-const ROUTINE = [moveSwing, moveWings, moveSwing, movePaws, moveWave];
+const ROUTINE = [moveSwing, moveBounce, moveSwing, moveWobble, moveShuffle];
 function dance(b) {
   const ph = Math.floor(b / 8), local = b - ph * 8;
   const cur = ROUTINE[ph % ROUTINE.length](b);
@@ -205,12 +193,12 @@ function dance(b) {
 
 // ---------- cast ----------
 const actors = $('actors');
-const main = makeAlien('#7ee36b');
+const main = makeAlien('#aedb2f');
 main.isMain = true;
 
-const PALETTE = ['#7ee36b', '#5fe0c3', '#b48cff', '#ff8fd1', '#ffd45e', '#6ec9ff', '#a3f05a', '#ff9f6b'];
+const PALETTE = ['#aedb2f', '#aedb2f', '#5fe0c3', '#b48cff', '#ff8fd1', '#ffd45e', '#6ec9ff', '#ff9f6b'];
 const crowd = [];
-const ROWS = [[675, .5, 82, 0], [705, .62, 100, 0], [760, .86, 140, 140], [880, 1.02, 168, 120], [1010, 1.2, 200, 170]];
+const ROWS = [[675, .5, 96, 0], [705, .62, 116, 0], [760, .86, 160, 150], [880, 1.02, 190, 130], [1010, 1.2, 225, 180]];
 const CR = rng(42);
 ROWS.forEach(([y, s, gap, hole], ri) => {
   for (let x = -420 + (ri % 2) * gap / 2; x < 2020; x += gap) {
@@ -251,7 +239,7 @@ function camFor(cx, cy, w, h) {
   if (vh > h) cy = Math.min(cy, cy + h / 2 + 120 - vh / 2);  // tall screens: keep the floor in, extra room goes to sky
   return [cx - vw / 2, cy - vh / 2, vw, vh];
 }
-const CAM_BASE = [800, 480, 1500, 860], CAM_IN = [800, 600, 470, 300], CAM_OUT = [800, 700, 2200, 1040];
+const CAM_BASE = [800, 480, 1500, 860], CAM_IN = [800, 650, 460, 300], CAM_OUT = [800, 700, 2200, 1040];
 function camAt(t) {
   let A = CAM_BASE, B = CAM_IN, e = 0;
   if (t < TL.zoomIn[1]) e = easeInOut(inv(TL.zoomIn[0], TL.zoomIn[1], t));
@@ -318,7 +306,7 @@ function render(t) {
     let cp, dy = 0;
     if (u < 1) {
       dy = -(1 - bounce(clamp(u))) * 950;
-      cp = P({ lUA: 120, rUA: -120, lFA: -20, rFA: 20, ant: 30 * Math.sin(u * 20) });
+      cp = P({ st: u < .6 ? 1.18 : 1 - .2 * Math.sin(Math.PI * clamp((u - .6) / .4)), ant: 30 * Math.sin(u * 20) });
     } else if (t < TL.dance) {
       cp = cheer(t - a.drop - .75 + 1, a.ph, .6);
     } else {
@@ -329,7 +317,7 @@ function render(t) {
   }
 
   // sparkles around main alien's head
-  const hx = x + pose.dx, hy = MAIN.y + pose.dy - 200;
+  const hx = x + pose.dx, hy = MAIN.y + pose.dy - 125;
   for (const s of sparks) {
     const k = (t - TL.happy - s.d) / 1.6;
     if (k < 0 || k > 1) { s.g.setAttribute('opacity', 0); continue; }
